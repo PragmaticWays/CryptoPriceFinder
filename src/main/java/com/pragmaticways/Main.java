@@ -11,21 +11,20 @@ public class Main {
 
   public static void main(String[] args) {
 
-
-    // print price for user to see
-
-    try {
-      while (isApplicationRunning) {
-        startMenu();
-      }
-    } catch (UserRequestsExitException e) {
-      System.out.println("Goodbye!");
-      // do normal shutdown
+    while (isApplicationRunning) {
+      startMenu();
     }
 
+    shutdown();
   }
 
   private static void startMenu() {
+    printMenu();
+    String input = getUserInput();
+    validateInputAndTakeAction(input);
+  }
+
+  private static void printMenu() {
     System.out.println("\n--------------------------------------");
     System.out.println("What coin price would you like to see?\n");
     for (String coinType : CryptoApi.ALL_COIN_TYPES) {
@@ -33,24 +32,30 @@ public class Main {
     }
     System.out.println("(type exit to quit)");
     System.out.print("> ");
+  }
 
-    String input = SCANNER_IN.nextLine().toLowerCase(Locale.ROOT);
+  private static String getUserInput() {
+    return SCANNER_IN.nextLine().toLowerCase(Locale.ROOT);
+  }
 
+  private static void validateInputAndTakeAction(String input) {
+    // Check if input is request to exit.
     if (input.equals("exit")) {
       isApplicationRunning = false;
-      throw new UserRequestsExitException();
-    }
 
-    if (isCoinTypeValid(input)) {
+      // Else check if user input is valid coin type
+    } else if (CryptoApi.isCoinTypeValid(input)) {
       String price = cryptoApi.getCurrentCoinPrice(input);
       System.out.println("The current price of " + input + " is " + price);
+
+      // Else, it's invalid. Inform the user and restart the menu.
     } else {
       System.out.println("That coin type is not supported. Please try again");
       startMenu();
     }
   }
 
-  private static boolean isCoinTypeValid(String input) {
-    return CryptoApi.ALL_COIN_TYPES.contains(input);
+  private static void shutdown() {
+    System.out.println("Goodbye!");
   }
 }
